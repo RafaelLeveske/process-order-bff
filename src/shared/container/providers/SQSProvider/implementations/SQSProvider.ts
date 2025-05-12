@@ -1,6 +1,6 @@
-import { SQS } from 'aws-sdk'
 import { ISQSProvider } from '../models/ISQSProvider'
 import { ISendToSQSQueue } from '../dtos/SQSProviderDTO'
+import { SQS } from 'aws-sdk'
 
 export class SQSProvider implements ISQSProvider {
   private sqs: SQS
