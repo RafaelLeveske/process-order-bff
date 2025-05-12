@@ -1,0 +1,61 @@
+org: rafaelleveske
+app: process-order-bff
+service: process-order-bff
+frameworkVersion: '3'
+
+custom:
+  names:
+    functions:
+      storeRequest: ${self:service}-${sls:stage}-store-order-request
+    sqs:
+      storeOrderRequest: ${self:service}-${sls:stage}-store-order-request
+provider:
+  name: aws
+  runtime: nodejs18.x
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - lambda:InvokeFunction
+          Resource: '*'
+        - Effect: Allow
+          Action:
+            - sqs:SendMessage
+            - sqs:DeleteMessage
+            - sqs:ReceiveMessage
+            - sqs:GetQueueUrl
+            - sqs:ListQueues
+          Resource: '*'
+  environment:
+    SERVERLESS_STAGE_NAME: ${sls:stage}
+    SERVERLESS_SERVICE_NAME: ${self:service}
+functions:
+  storeRequest:
+    name: ${self:custom.names.functions.storeRequest}
+    description: Store a public data from a front end on order receiving
+    handler: api.storeRequestAPI
+    environment:
+      AWS_NODEJS_CONNECTION_REUSE_ENABLED : 1
+    events:
+      - httpApi:
+          method: POST
+          path: /process-order
+      - sqs:
+          arn:
+            Fn::GetAtt:
+              - StoreOrderRequestQueue
+              - Arn
+          batchSize: 1
+resources:
+  Resources:
+    StoreOrderRequestQueue:
+      Type: AWS::SQS::Queue
+      Properties:
+        MessageRetentionPeriod: 86400
+        VisibilityTimeout: 36000
+        QueueName: ${self:custom.names.sqs.storeOrderRequest}
+
+plugins:
+  - serverless-plugin-typescript
+  - serverless-offline
