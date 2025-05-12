@@ -16,11 +16,10 @@ export default (handlerFunction: Handler): Handler =>
     try {
       const data = await handlerFunction(event, context, callback);
 
-      const { message, approved, statusCode, body } = data;
+      const { statusCode } = data;
 
       return {
         statusCode: statusCode || HttpStatus.OK,
-        body: JSON.stringify({ message: message || body?.message, approved }),
       };
     } catch (error) {
       return JSON.stringify({

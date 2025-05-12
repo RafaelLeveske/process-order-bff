@@ -19,16 +19,11 @@ export const storeRequest: Handler = async (
     console.log({ event: JSON.stringify(requestBody) });
 
     const storeRequestService = container.resolve(StoreRequestsService);
-    const response = await storeRequestService.execute({
+    await storeRequestService.execute({
       requestBody,
     });
-    console.log({ response });
     return {
-      statusCode: response.statusCode,
-      body: JSON.stringify({
-        message: response.message,
-        data: response.data,
-      }),
+      statusCode: 202,
     };
 
   } catch (error) {
