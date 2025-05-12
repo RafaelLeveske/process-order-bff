@@ -57,5 +57,5 @@ resources:
         QueueName: ${self:custom.names.sqs.storeOrderRequest}
 
 plugins:
-  - serverless-plugin-typescript
+  - serverless-esbuild
   - serverless-offline
