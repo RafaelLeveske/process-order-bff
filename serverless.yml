@@ -20,10 +20,7 @@ provider:
         - Effect: Allow
           Action:
             - sqs:SendMessage
-            - sqs:DeleteMessage
-            - sqs:ReceiveMessage
             - sqs:GetQueueUrl
-            - sqs:ListQueues
           Resource: '*'
   environment:
     SERVERLESS_STAGE_NAME: ${sls:stage}
