@@ -35,24 +35,11 @@ functions:
     handler: api.storeRequestAPI
     environment:
       AWS_NODEJS_CONNECTION_REUSE_ENABLED : 1
+      NEST_SERVERLESS_APP_PROCESS_ORDER_QUEUE: ${ssm:/${self:service}/${sls:stage}/NEST_SERVERLESS_APP_PROCESS_ORDER_QUEUE}
     events:
       - httpApi:
           method: POST
           path: /process-order
-      - sqs:
-          arn:
-            Fn::GetAtt:
-              - StoreOrderRequestQueue
-              - Arn
-          batchSize: 1
-resources:
-  Resources:
-    StoreOrderRequestQueue:
-      Type: AWS::SQS::Queue
-      Properties:
-        MessageRetentionPeriod: 86400
-        VisibilityTimeout: 36000
-        QueueName: ${self:custom.names.sqs.storeOrderRequest}
 
 plugins:
   - serverless-esbuild

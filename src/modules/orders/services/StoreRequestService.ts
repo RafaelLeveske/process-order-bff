@@ -11,7 +11,7 @@ export class StoreRequestsService {
   }
 
   async execute(payload: any): Promise<void> {
-    const queue = `${process.env.SERVERLESS_SERVICE_NAME}-${process.env.SERVERLESS_STAGE_NAME}-store-order-request`
+    const queue = process.env.NEST_SERVERLESS_APP_PROCESS_ORDER_QUEUE
     const queueURL = await this.sqsProvider.getSQSQueueUrl(queue)
     await this.sqsProvider.sendToSQSQueue({
       messageBody: payload,
