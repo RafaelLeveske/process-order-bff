@@ -1,95 +1,132 @@
-# Serverless - AWS Node.js Typescript
+# 🚀 process-order-bff
 
-This project has been generated using the `aws-nodejs-typescript` template from the [Serverless framework](https://www.serverless.com/).
+> A lightweight BFF (Backend-for-Frontend) built with Serverless Framework and TypeScript. It exposes an HTTP endpoint via API Gateway that sends messages to an AWS SQS queue for service order processing.
 
-For detailed instructions, please refer to the [documentation](https://www.serverless.com/framework/docs/providers/aws/).
+## 📚 Overview
 
-## Installation/deployment instructions
+This project implements a serverless API using **TypeScript** and the **Serverless Framework** to receive service order data from frontend clients or other systems and push it into an **AWS SQS queue**.
 
-Depending on your preferred package manager, follow the instructions below to deploy your project.
+It acts as a communication layer between the frontend and the queue, ensuring asynchronous and decoupled processing of service orders.
 
-> **Requirements**: NodeJS `lts/fermium (v.14.15.0)`. If you're using [nvm](https://github.com/nvm-sh/nvm), run `nvm use` to ensure you're using the same Node version in local and in your lambda's runtime.
+---
 
-### Using NPM
-
-- Run `npm i` to install the project dependencies
-- Run `npx sls deploy` to deploy this stack to AWS
-
-### Using Yarn
-
-- Run `yarn` to install the project dependencies
-- Run `yarn sls deploy` to deploy this stack to AWS
-
-## Test your service
-
-This template contains a single lambda function triggered by an HTTP request made on the provisioned API Gateway REST API `/hello` route with `POST` method. The request body must be provided as `application/json`. The body structure is tested by API Gateway against `src/functions/hello/schema.ts` JSON-Schema definition: it must contain the `name` property.
-
-- requesting any other path than `/hello` with any other method than `POST` will result in API Gateway returning a `403` HTTP error code
-- sending a `POST` request to `/hello` with a payload **not** containing a string property named `name` will result in API Gateway returning a `400` HTTP error code
-- sending a `POST` request to `/hello` with a payload containing a string property named `name` will result in API Gateway returning a `200` HTTP status code with a message saluting the provided name and the detailed event processed by the lambda
-
-> :warning: As is, this template, once deployed, opens a **public** endpoint within your AWS account resources. Anybody with the URL can actively execute the API Gateway endpoint and the corresponding lambda. You should protect this endpoint with the authentication method of your choice.
-
-### Locally
-
-In order to test the hello function locally, run the following command:
-
-- `npx sls invoke local -f hello --path src/functions/hello/mock.json` if you're using NPM
-- `yarn sls invoke local -f hello --path src/functions/hello/mock.json` if you're using Yarn
-
-Check the [sls invoke local command documentation](https://www.serverless.com/framework/docs/providers/aws/cli-reference/invoke-local/) for more information.
-
-### Remotely
-
-Copy and replace your `url` - found in Serverless `deploy` command output - and `name` parameter in the following `curl` command in your terminal or in Postman to test your newly deployed application.
+## ⚙️ Architecture
 
 ```
-curl --location --request POST 'https://myApiEndpoint/dev/hello' \
---header 'Content-Type: application/json' \
---data-raw '{
-    "name": "Frederic"
-}'
+[Client / Frontend]
+        │
+     HTTP API
+        │
+[API Gateway + Lambda (BFF)]
+        │
+     [AWS SQS Queue]
+        │
+[Consumer Service: order indexer]
 ```
 
-## Template features
+- **API Gateway**: Exposes an HTTP POST endpoint to accept order data
+- **Lambda (BFF)**: Handles requests and sends them to the SQS queue
+- **SQS**: Buffers messages for asynchronous consumption
+- **Consumer (another service)**: Processes and indexes the received orders
 
-### Project structure
+---
 
-The project code base is mainly located within the `src` folder. This folder is divided in:
+## 🧑‍💻 Tech Stack
 
-- `functions` - containing code base and configuration for your lambda functions
-- `libs` - containing shared code base between your lambdas
+- **TypeScript**
+- **Serverless Framework**
+- **AWS Lambda**
+- **AWS API Gateway**
+- **AWS SQS**
+
+---
+
+## 🚀 Getting Started
+
+### Prerequisites
+
+- [Node.js](https://nodejs.org/)
+- [npm](https://www.npmjs.com/)
+- [Serverless Framework](https://www.serverless.com/framework/docs/getting-started/)
+- [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/install-cliv2.html) configured with credentials
+
+---
+
+### 1. Install dependencies
+
+```bash
+npm install
+```
+
+---
+
+### 2. Deploy to AWS
+
+```bash
+npx serverless deploy
+```
+
+After deployment, you will receive a URL like:
 
 ```
-.
-├── src
-│   ├── functions               # Lambda configuration and source code folder
-│   │   ├── hello
-│   │   │   ├── handler.ts      # `Hello` lambda source code
-│   │   │   ├── index.ts        # `Hello` lambda Serverless configuration
-│   │   │   ├── mock.json       # `Hello` lambda input parameter, if any, for local invocation
-│   │   │   └── schema.ts       # `Hello` lambda input event JSON-Schema
-│   │   │
-│   │   └── index.ts            # Import/export of all lambda configurations
-│   │
-│   └── libs                    # Lambda shared code
-│       └── apiGateway.ts       # API Gateway specific helpers
-│       └── handlerResolver.ts  # Sharable library for resolving lambda handlers
-│       └── lambda.ts           # Lambda middleware
+https://<your-api-id>.execute-api.<region>.amazonaws.com/dev/orders
+```
+
+---
+
+### 3. Sending a Test Request
+
+Use `curl` or Postman to send a request:
+
+```bash
+curl -X POST https://<your-api-id>.execute-api.<region>.amazonaws.com/process-order \
+  -H "Content-Type: application/json" \
+  -d '{
+    "order_id": "123",
+    "description": "Test order from BFF"
+  }'
+```
+
+This will publish the order data to the configured SQS queue.
+
+---
+
+## 📁 Project Structure
+
+```bash
+process-order-bff/
 │
-├── package.json
-├── serverless.ts               # Serverless service file
-├── tsconfig.json               # Typescript compiler configuration
-├── tsconfig.paths.json         # Typescript paths
-└── webpack.config.js           # Webpack configuration
+├── src/
+│   └── handler.ts          # Lambda handler that receives and processes the request
+│
+├── serverless.yml          # Serverless Framework configuration
+├── tsconfig.json           # TypeScript configuration
+└── README.md               # This file
 ```
 
-### 3rd party libraries
+---
 
-- [json-schema-to-ts](https://github.com/ThomasAribart/json-schema-to-ts) - uses JSON-Schema definitions used by API Gateway for HTTP request validation to statically generate TypeScript types in your lambda's handler code base
-- [middy](https://github.com/middyjs/middy) - middleware engine for Node.Js lambda. This template uses [http-json-body-parser](https://github.com/middyjs/middy/tree/master/packages/http-json-body-parser) to convert API Gateway `event.body` property, originally passed as a stringified JSON, to its corresponding parsed object
-- [@serverless/typescript](https://github.com/serverless/typescript) - provides up-to-date TypeScript definitions for your `serverless.ts` service file
+## 🤝 Contributing
 
-### Advanced usage
+1. Fork this repository  
+2. Create a new branch: `git checkout -b my-feature`  
+3. Commit your changes: `git commit -m 'feat: my feature'`  
+4. Push your branch: `git push origin my-feature`  
+5. Open a Pull Request
 
-Any tsconfig.json can be used, but if you do, set the environment variable `TS_NODE_CONFIG` for building the application, eg `TS_NODE_CONFIG=./tsconfig.app.json npx serverless webpack`
+---
+
+## 💡 Future Improvements
+
+- Add input validation and schema enforcement  
+- Add authentication layer (e.g., Cognito, JWT)  
+- Improve error handling and monitoring (e.g., with CloudWatch)  
+- Configure retry policies and DLQ for SQS failures
+
+---
+
+## 🧑‍🏫 Author
+
+Developed by **Rafael Vieira**  
+[LinkedIn](https://www.linkedin.com/in/rafael-eraldo-vieira/)  
+[GitHub](https://github.com/RafaelLeveske)
