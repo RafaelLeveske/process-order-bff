@@ -1,5 +1,5 @@
 service: process-order-bff
-frameworkVersion: '3'
+frameworkVersion: '4'
 
 custom:
   names:
@@ -42,5 +42,4 @@ functions:
           path: /process-order
 
 plugins:
-  - serverless-esbuild
   - serverless-offline
