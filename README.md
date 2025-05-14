@@ -95,13 +95,16 @@ This will publish the order data to the configured SQS queue.
 
 ```bash
 process-order-bff/
-│
+├── README.md               # Project documentation and usage guide
+├── api.ts                 # Entry point for the Serverless handler (mapped in serverless.yml)
+├── package.json            # Project metadata and dependencies
+├── package-lock.json       # Lock file for deterministic installs
+├── serverless.yml          # Serverless Framework configuration (functions, resources, permissions)
+├── tsconfig.json           # TypeScript compiler configuration
+├── tsconfig.paths.json     # Custom path aliases used in the project
 ├── src/
-│   └── handler.ts          # Lambda handler that receives and processes the request
-│
-├── serverless.yml          # Serverless Framework configuration
-├── tsconfig.json           # TypeScript configuration
-└── README.md               # This file
+│   ├── modules/            # Domain-specific logic (e.g., order handling)
+│   └── shared/             # Reusable utilities, services, or configuration
 ```
 
 ---
